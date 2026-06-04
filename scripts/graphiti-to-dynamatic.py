@@ -5,6 +5,7 @@ from collections import defaultdict
 import sys
 import subprocess
 import graphiti_conv as gc
+import graphiti_ir as gi
 import argparse
 import json
 
@@ -287,8 +288,8 @@ def remove_graphiti_metadata(nx_graph):
         if 'graphiti_metadata' in data:
             del data['graphiti_metadata']
 
-def process_dot(tag_num, input_path, output_path):
-    nx_graph = gc.parse_dot(input_path)
+def process_ir(tag_num, input_path, output_path):
+    nx_graph = gi.parse_mlir(input_path)
     find_all_bbID(nx_graph)
     to_cntrl_merge(nx_graph)
     add_tagger_info(nx_graph)
@@ -302,9 +303,9 @@ def process_dot(tag_num, input_path, output_path):
     gc.write_dot(output_path, nx_graph)
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Convert a Graphiti graph back into a graph ready for Dynamatic.')
-    parser.add_argument('input', help='input graph from Graphiti')
+    parser = argparse.ArgumentParser(description='Convert a Graphiti MLIR-like IR back into a graph ready for Dynamatic.')
+    parser.add_argument('input', help='input MLIR-like IR from Graphiti')
     parser.add_argument('--output', '-o', help='path for output graph')
     parser.add_argument('--tags', '-t', help='number of tags to allocate')
     args = parser.parse_args()
-    process_dot(int(args.tags), args.input, args.output)
+    process_ir(int(args.tags), args.input, args.output)
