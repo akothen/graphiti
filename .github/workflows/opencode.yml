@@ -1,4 +1,4 @@
-name: OpenCode Agent (DeepSeek V4 Pro)
+name: opencode
 
 on:
   issue_comment:
@@ -7,36 +7,27 @@ on:
     types: [created]
 
 jobs:
-  opencode-deepseek-agent:
-    # Only run if a comment starts with /opencode or /OC
-    if: startsWith(github.event.comment.body, '/opencode') || startsWith(github.event.comment.body, '/OC')
+  opencode:
+    if: |
+      contains(github.event.comment.body, '/oc') ||
+      contains(github.event.comment.body, '/opencode')
     runs-on: ubuntu-latest
-
+    permissions:
+      id-token: write
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+       - name: Checkout repository
+         uses: actions/checkout@v6
+         with:
+           fetch-depth: 1
+           persist-credentials: false
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install OpenCode and Plugins
-        run: |
-          npm install -g @opencode-ai/cli
-          bunx oh-my-opencode install --headless
-
-      - name: Run OpenCode Agent Task
+       - name: Run OpenCode
+        uses: anomalyco/opencode/github@latest
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
-          OPENCODE_PROVIDER: "deepseek"
           OPENCODE_MODEL: "deepseek-v4-pro"
           DEEPSEEK_REASONING_EFFORT: "max"  # Maximize reasoning capabilities for complex coding tasks
-        run: |
-          opencode github run \
-            --issue-number "${{ github.event.issue.number || github.event.pull_request.number }}" \
-            --comment-body "${{ github.event.comment.body }}"
+        with:
+          model: deepseek-v4-pro
+          # share: true
+          # github_token: xxxx
