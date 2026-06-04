@@ -8,6 +8,7 @@ import Graphiti.Core.ExprHigh
 import Graphiti.Core.DotParser
 import Graphiti.Core.Rewriter
 import Graphiti.Core.DynamaticPrinter
+import Graphiti.Core.MLIRPrinter
 import Graphiti.Core.Rewrites
 import Graphiti.Core.JSLang
 
@@ -411,8 +412,11 @@ def main (args : List String) : IO Unit := timeit "Total: " do
     if parsed.noPython || parsed.noDynamaticDot then
       IO.FS.writeFile ofile l
     else
+      -- Use the MLIR-like IR as the intermediate format passed to Python,
+      -- so that graphiti-to-dynamatic.py never reads a DOT file as input.
+      let lMlir ← IO.ofExcept <| mlirString rewrittenExprHigh uf assoc
       IO.FS.withTempFile λ handle fn => do
-        handle.putStr l
+        handle.putStr lMlir
         handle.flush
         let _ ← IO.Process.run {
             cmd := parsed.pythonInterpreter.splitOn.head!,
