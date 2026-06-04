@@ -25,9 +25,9 @@ jobs:
         uses: anomalyco/opencode/github@latest
         env:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
-          OPENCODE_MODEL: "deepseek-v4-pro"
+          OPENCODE_MODEL: "deepseek-ai/DeepSeek-V4-Pro"
           DEEPSEEK_REASONING_EFFORT: "max"  # Maximize reasoning capabilities for complex coding tasks
         with:
-          model: deepseek-v4-pro
+          model: deepseek-ai/DeepSeek-V4-Pro
           # share: true
           # github_token: xxxx
