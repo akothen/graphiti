@@ -100,7 +100,7 @@ def _parse_attrs_str(s: str) -> dict:
             # Quoted value: scan for the closing unescaped double-quote
             i = 1
             while i < len(s):
-                if s[i] == '\\':
+                if s[i] == '\\' and i + 1 < len(s):
                     i += 2  # skip backslash-escaped character
                 elif s[i] == '"':
                     break

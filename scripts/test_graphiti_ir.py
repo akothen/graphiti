@@ -189,7 +189,11 @@ def test_graphiti_metadata_round_trip():
 def test_write_and_parse_mlir(tmp_path):
     """write_mlir / parse_mlir round-trip via a real file."""
     g = nx.MultiDiGraph()
-    g.add_node('n', **{'type': '"Fork"', 'bbID': '2', 'in': '"in1:32"', 'out': '"out1:32 out2:32"', 'tagged': 'false', 'taggers_num': '0', 'tagger_id': '-1'})
+    g.add_node('n', **{
+        'type': '"Fork"', 'bbID': '2',
+        'in': '"in1:32"', 'out': '"out1:32 out2:32"',
+        'tagged': 'false', 'taggers_num': '0', 'tagger_id': '-1',
+    })
     g.add_node('m', **{'type': '"Sink"', 'bbID': '2', 'in': '"in1:32"'})
     g.add_edge('n', 'm', **{'from': '"out1"', 'to': '"in1"'})
 
