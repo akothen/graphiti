@@ -241,24 +241,32 @@ def parse_port_spec(spec: str) -> "Port":
         base_qual = PortQualifier.NONE
 
     # Determine *-suffix qualifier (overrides base if present)
+    _LSCA_RE = re.compile(r"([lsc])(\d+)([ade]?)$")  # l/s/c + index + optional a/d/e
     if suffix:
         s = suffix[1:]  # strip leading '*'
         if s == "i":
             qual: PortQual = PortQualifier.INIT_TOKEN
         elif s == "e":
             qual = PortQualifier.END_TOKEN
-        elif re.fullmatch(r"l(\d+)a", s):
-            qual = LoadAddrQual(int(re.fullmatch(r"l(\d+)a", s).group(1)))
-        elif re.fullmatch(r"l(\d+)d", s):
-            qual = LoadDataQual(int(re.fullmatch(r"l(\d+)d", s).group(1)))
-        elif re.fullmatch(r"s(\d+)a", s):
-            qual = StoreAddrQual(int(re.fullmatch(r"s(\d+)a", s).group(1)))
-        elif re.fullmatch(r"s(\d+)d", s):
-            qual = StoreDataQual(int(re.fullmatch(r"s(\d+)d", s).group(1)))
-        elif re.fullmatch(r"c(\d+)", s):
-            qual = CountQual(int(re.fullmatch(r"c(\d+)", s).group(1)))
         else:
-            raise ValueError(f"Unknown port suffix: *{s!r} in {spec!r}")
+            m = _LSCA_RE.match(s)
+            if m:
+                kind, idx_s, sub = m.group(1), m.group(2), m.group(3)
+                idx = int(idx_s)
+                if kind == "l" and sub == "a":
+                    qual = LoadAddrQual(idx)
+                elif kind == "l" and sub == "d":
+                    qual = LoadDataQual(idx)
+                elif kind == "s" and sub == "a":
+                    qual = StoreAddrQual(idx)
+                elif kind == "s" and sub == "d":
+                    qual = StoreDataQual(idx)
+                elif kind == "c" and sub == "":
+                    qual = CountQual(idx)
+                else:
+                    raise ValueError(f"Unknown port suffix: *{s!r} in {spec!r}")
+            else:
+                raise ValueError(f"Unknown port suffix: *{s!r} in {spec!r}")
     else:
         qual = base_qual
 
@@ -1248,7 +1256,7 @@ def example_dynamatic_no_control_flow() -> GraphitiModule:
     ))
 
     # ---- block 0 ----
-    end_0 = bb0.add(NB.exit(          # noqa: F841
+    _end_0 = bb0.add(NB.exit(          # noqa: F841
         "end_0", 0,
         [use(ret_0.result("out2"), "in1", color="red")],
         i(32),
